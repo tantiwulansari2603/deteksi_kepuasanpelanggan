@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>{% if judul %}{{ judul }} - {% endif %}Kepuasan Pelanggan</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap/css/bootstrap.min.css') }}">
+    <script src="https://kit.fontawesome.com/f2151fe6dc.js" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+</head>
+
+<body>
+    <nav class="navbar navbar-dark navbar-expand-md shadow" style="background: #3591ae;">
+        <div class="container-fluid"><a class="navbar-brand mx-auto">
+            <h2>Kepuasan Pelanggan</h2>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card border-info border rounded-0 shadow" style="margin-bottom: 10px; margin-top: 15px; width: 700px; height: 50px; background: #3591ae;">
+                    <h4 class="text-center text-white" style="margin-top: 8px">Kamera</h4>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card border-info border rounded-0 shadow" style="margin-bottom: 10px; margin-top: 15px; width: 700px; height: 50px; background: #3591ae;">
+                        <h4 class="text-center text-white" style="margin-top: 8px; ">Hasil Prediksi Kepuasan Pelanggan</h4>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card border-info border rounded-0 shadow" style="margin-bottom: 10px; margin-top: 15px; width: 700px; height: 550px;">
+                    <div class="card-body">
+                        <div id="video_container">
+                            <img id="video_feed" src="{{ url_for('video_feed') }}">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card border-info border rounded-0 shadow" style="margin-bottom: 10px; margin-top: 15px; width: 700px; height: 550px;">
+                    <div class="card-body">
+                        <!--- <p>{{ most_common_expression }}</p>  
+                        <p id="result">Hasil ...</p>-->
+                        <!-- Tambahkan tombol pada bagian body HTML -->
+                        <button id="startSystemButton" onclick="startSystem()">Start System</button>
+                        <button id="stopSystemButton" onclick="stopSystem()" disabled>Stop System</button>
+                        
+                        <!-- Tambahkan elemen untuk menampilkan poin -->
+                        <p>Poin Puas: <span id="puasPoints">{{ puas_points }}</span></p>
+                        <p>Poin Tidak Puas: <span id="tidakPuasPoints">{{ tidak_puas_points }}</span></p>
+
+                        
+                        <!-- Tambahkan elemen tampilan awal -->
+                        <div id="initialView">
+                            <p>Studi ekspresi wajah sedang berlangsung...</p>
+                        </div>
+
+                        <!-- Tambahkan elemen untuk hasil ekspresi terbanyak -->
+                        <div id="resultView" style="display: none;">
+                            <i id="expressionIcon" class="fa-10x fa-regular fa-face-meh" style="color: #3591ae; font-size: 400px; margin-top: 50px; margin-left: 130px"></i>
+                            <p id="result">Tidak ada hasil ekspresi yang terdeteksi</p>
+                        </div>
+                        
+                        <!--<div class="card-body">
+                            <i id="expressionIcon" class="fa-10x fa-regular fa-face-smile" style="color: #3591ae; font-size: 400px; margin-top: 50px; margin-left: 130px"></i>
+                        </div>-->
+                        <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+                            <script>
+                                var socket = io.connect('http://' + document.domain + ':' + location.port);
+
+                                socket.on('connect', function() {
+                                    socket.emit('get_expression');
+                                });
+
+                                socket.on('update_expression', function(data) {
+                                    console.log("Data dari Server:", data);
+                                
+                                    if (data.most_common_expression === "Puas") {
+                                        console.log("Ekspresi Puas");
+                                        $("#expressionIcon").removeClass().addClass("fa-10x fa-regular fa-face-smile");
+                                    } else if (data.most_common_expression === "TidakPuas") {
+                                        console.log("Ekspresi Tidak Puas");
+                                        $("#expressionIcon").removeClass().addClass("fa-10x fa-regular fa-face-frown");
+                                    } else {
+                                        console.log("Ekspresi Tidak Terdeteksi");
+                                        $("#expressionIcon").removeClass().addClass("fa-10x fa-regular fa-face-meh");
+                                    }
+                                    $("#result").text(data.most_common_expression);
+                                    $("#initialView").hide();
+                                    $("#resultView").show();
+
+                                    // Update poin pada tampilan HTML
+                                    $("#puasPoints").text(data.puas_points);
+                                    $("#tidakPuasPoints").text(data.tidak_puas_points);
+                                });
+
+                                // Fungsi untuk memulai video
+                                function startSystem() {
+                                    $.ajax({
+                                        url: '/start_system',
+                                        type: 'POST',
+                                        success: function(response) {
+                                            console.log(response.status);
+                                            // Aktifkan tombol stop dan nonaktifkan tombol start
+                                            $("#startSystemButton").prop("disabled", true);
+                                            $("#stopSystemButton").prop("disabled", false);
+                                        }
+                                    });
+                                }
+                            
+                                // Fungsi untuk menghentikan sistem
+                                function stopSystem() {
+                                    $.ajax({
+                                        url: '/stop_system',
+                                        type: 'POST',
+                                        success: function(response) {
+                                            console.log(response.status);
+                                            // Aktifkan tombol start dan nonaktifkan tombol stop
+                                            $("#startSystemButton").prop("disabled", false);
+                                            $("#stopSystemButton").prop("disabled", true);
+                                        }
+                                    });
+                                }
+                            </script>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='bootstrap/js/bootstrap.min.js') }}"></script>
+    <script>
+        // Fungsi untuk mengambil data point dari file JSON secara sinkron
+        function getPointsFromAPI() {
+            $.ajax({
+                url: '/get_points',  // Sesuaikan dengan rute API Flask Anda
+                type: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    // Mengupdate nilai poin puas dan tidak puas pada tampilan HTML
+                    $("#puasPoints").text(response.puas);
+                    $("#tidakPuasPoints").text(response.tidak_puas);
+                },
+                error: function(error) {
+                    console.error('Error getting points from API:', error);
+                }
+            });
+        }
+
+        $(document).ready(function() {
+            getPointsFromAPI();
+
+        });
+    </script>
+</body>
+</html>
